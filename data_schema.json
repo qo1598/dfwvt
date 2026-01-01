@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DataFlywheelEntry",
+  "type": "object",
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "student_output": {
+      "type": "object",
+      "properties": {
+        "routine": {
+          "type": "string",
+          "const": "See-Think-Wonder"
+        },
+        "stimulus_id": {
+          "type": "string"
+        },
+        "see": {
+          "type": "string"
+        },
+        "think": {
+          "type": "string"
+        },
+        "wonder": {
+          "type": "string"
+        }
+      },
+      "required": ["routine", "see", "think", "wonder"]
+    },
+    "llm_feedbacks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "model_id": {
+            "type": "string"
+          },
+          "flywheel_iteration": {
+            "type": "integer",
+            "description": "0 for base model, n for n-th finetuned version"
+          },
+          "feedback_text": {
+            "type": "string"
+          },
+          "teacher_eval": {
+            "type": "object",
+            "properties": {
+              "score": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10
+              },
+              "comment": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": ["model_id", "feedback_text"]
+      }
+    }
+  },
+  "required": ["session_id", "student_output", "llm_feedbacks"]
+}
