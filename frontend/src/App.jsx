@@ -32,9 +32,17 @@ function App() {
       const savedSession = localStorage.getItem("saved_session");
       if (savedSession) {
         console.log("Restoring session from storage...");
-        setSessionData(JSON.parse(savedSession));
-        // Restore Feedback Cache if possible? Currently simple session restore.
-        setStep(1);
+        const parsed = JSON.parse(savedSession);
+
+        // Check for error states in cached session
+        if (parsed.image_url && (parsed.image_url.includes("Error") || parsed.image_url.includes("placehold.co"))) {
+          console.log("Found broken session, discarding and refreshing...");
+          localStorage.removeItem("saved_session");
+          refreshSession(accessCode);
+        } else {
+          setSessionData(parsed);
+          setStep(1);
+        }
       } else {
         console.log("No saved session, fetching new...");
         refreshSession(accessCode);

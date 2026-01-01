@@ -8,3 +8,4 @@ supabase
 anthropic
 pillow
 aiohttp
+requests

@@ -6,7 +6,7 @@ from supabase import create_client, Client
 # Enable CORS for frontend
 from fastapi.middleware.cors import CORSMiddleware
 
-load_dotenv()
+load_dotenv(override=True)
 
 url: str = os.environ.get("SUPABASE_URL")
 key: str = os.environ.get("SUPABASE_KEY")

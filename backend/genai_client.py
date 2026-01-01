@@ -1,31 +1,28 @@
 """
-GenAI Client for Image Generation using Gemini 2.5 Flash (Nano Banana)
-Reference: https://ai.google.dev/gemini-api/docs/image-generation
+GenAI Client for Image Generation using Gemini 2.5 Flash
 """
 import os
-import io
 from google import genai
-from google.genai import types
 from PIL import Image
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 class GenAIClient:
     def __init__(self):
-        # Using Gemini 2.5 Flash Image (aka Nano Banana) for image generation
+        # Using Gemini 2.5 Flash for image generation
         self.client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY"))
         self.model = 'gemini-2.5-flash-image'
 
     def generate_image(self, prompt: str) -> str:
         """
-        Generates an image from a prompt using Gemini 2.5 Flash Image (Nano Banana).
+        Generates an image from a prompt using Gemini 2.5 Flash.
         Returns the relative path to the saved image or a placeholder URL.
         """
         try:
             print(f"[IMAGE] Generating with Gemini 2.5 Flash: {prompt}")
             
-            # Use Gemini 2.5 Flash Image (Nano Banana) - exact API from documentation
+            # Use Gemini 2.5 Flash for image generation
             response = self.client.models.generate_content(
                 model=self.model,
                 contents=[prompt]
