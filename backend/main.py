@@ -20,6 +20,8 @@ app.add_middleware(
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:3000", # Just in case
+        "https://dfwvt.vercel.app",  # Production Vercel App
+        "https://dfwvt-frontend.vercel.app" # Alternate Vercel Domain format
     ],
     allow_credentials=True,
     allow_methods=["*"],
