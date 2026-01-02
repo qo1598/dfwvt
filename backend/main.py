@@ -205,19 +205,36 @@ async def submit_evaluation(request: SubmitRequest):
             if not models_evals: continue
             
             for model_id, eval_data in models_evals.items():
+                # Safe casting for score
+                raw_score = eval_data.get('score', 0)
+                if raw_score is None:
+                    raw_score = 0
+                try:
+                    score_val = int(raw_score)
+                except (ValueError, TypeError):
+                    score_val = 0
+
                 record = {
                     "session_id": request.session_id,
                     "routine_step": stage.lower(),
                     "model_id": model_id,
                     "feedback_content": eval_data.get('feedback_text', 'No content provided'), 
-                    "teacher_score": int(eval_data.get('score', 0)),
+                    "teacher_score": score_val,
                     "teacher_comment": eval_data.get('comment', '')
                 }
                 eval_records.append(record)
         
+        print(f"[DEBUG] Prepared {len(eval_records)} evaluation records for insertion")
+        
         if eval_records:
-            supabase.table("flywheel_evaluations").insert(eval_records).execute()
-            print(f"[SUCCESS] Saved {len(eval_records)} evaluation records")
+            try:
+                response = supabase.table("flywheel_evaluations").insert(eval_records).execute()
+                print(f"[SUCCESS] Saved {len(eval_records)} evaluation records. Response: {response}")
+            except Exception as e:
+                print(f"[ERROR] Failed to insert evaluations: {e}")
+                # We do not re-raise immediately to avoid 500 if session was saved.
+                # But partial failure is bad. Let's return warning.
+                return {"status": "partial_success", "warning": f"Evaluations failed: {str(e)}", "image_url": final_image_url}
                 
         return {"status": "success", "records_saved": len(eval_records), "image_url": final_image_url}
 
