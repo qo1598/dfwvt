@@ -33,18 +33,19 @@ class GenAIClient:
                 if part.text is not None:
                     print(f"[INFO] Model response text: {part.text[:100]}...")
                 elif part.inline_data is not None:
-                    # Convert to PIL Image and save
-                    image = part.as_image()
+                    # Deployment Friendly: Return Base64 directly
+                    # Eliminated disk write to allow serverless deployment without storage bucket
+                    import base64
                     
-                    filename = f"generated_{os.urandom(4).hex()}.png"
-                    directory = os.path.join(os.path.dirname(__file__), "../frontend/public/generated")
-                    os.makedirs(directory, exist_ok=True)
+                    # 'part.inline_data.data' contains the raw bytes
+                    image_bytes = part.inline_data.data
+                    b64_string = base64.b64encode(image_bytes).decode('utf-8')
                     
-                    filepath = os.path.join(directory, filename)
-                    image.save(filepath)
+                    # Construct data URL
+                    data_url = f"data:image/png;base64,{b64_string}"
                     
-                    print(f"[OK] Image generated and saved to: {filepath}")
-                    return f"/generated/{filename}"
+                    print(f"[OK] Image generated as Base64 (Length: {len(data_url)})")
+                    return data_url
             
             # If no image was generated
             print("[WARN] No image found in response parts")

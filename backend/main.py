@@ -30,7 +30,7 @@ from genai_client import GenAIClient
 from simulator import Simulator
 from feedback_engine import FeedbackEngine
 from pydantic import BaseModel
-from typing import Dict
+from typing import Dict, Any
 import random
 
 genai_client = GenAIClient()
@@ -43,95 +43,53 @@ class FeedbackRequest(BaseModel):
 
 # 개념기반탐구수업을 위한 다양한 탐구 주제 시나리오
 INQUIRY_SCENARIOS = [
-    # 과학 탐구
-    "A butterfly emerging from its chrysalis on a flower in morning sunlight",
-    "Ice cubes melting in a glass with condensation on the outside",
-    "A shadow changing length throughout the day with the sun's position",
-    "Seeds sprouting in different soil types with visible root systems",
-    "A rainbow forming in water droplets from a garden hose",
-    "Magnets attracting and repelling with iron filings showing field patterns",
-    "A candle flame with different colored zones and melting wax",
-    "Bubbles floating with swirling rainbow colors reflecting on their surface",
-    
-    # 환경과 자연
-    "A river splitting around a large rock, showing different water speeds",
-    "Tree rings visible on a cut log showing years of growth",
-    "Footprints of different animals in mud near a watering hole",
-    "A bird building a nest with various materials",
-    "Leaves changing colors from green to red and yellow in autumn",
-    "A spider web covered in morning dew drops sparkling in sunlight",
-    "Erosion patterns in soil after rainfall on a hillside",
-    "A decomposing log with mushrooms and insects creating new soil",
-    
-    # 사회와 문화
-    "Children from different cultures sharing traditional foods at a table",
-    "Old and new buildings standing side by side in a city street",
-    "A traditional market with vendors and various goods being exchanged",
-    "Different types of homes in various climates around the world",
-    "A community garden where neighbors work together planting vegetables",
-    "Street art mural being painted showing diverse people and cultures",
-    "A library with students reading different types of books and tablets",
-    "Different modes of transportation through history displayed together",
-    
-    # 예술과 창의성
-    "Primary colors mixing on a palette creating secondary colors",
-    "Musical instruments from around the world arranged in a circle",
-    "Recycled materials transformed into creative art sculptures",
-    "Light and shadow creating patterns through a decorative window",
-    "Natural patterns: spirals in shells, fractals in ferns, symmetry in flowers",
-    "A pottery wheel shaping clay into a vessel with hands visible",
-    "Origami figures in various stages of folding from paper to final form",
-    
-    # 수학과 패턴
-    "A honeycomb showing perfect hexagonal patterns with bees working",
-    "Fruits cut in half revealing symmetrical patterns and seed arrangements",
-    "Gears of different sizes interlocking and turning together",
-    "A spiral staircase viewed from above showing mathematical curves",
-    "Tiles arranged in repeating patterns with different shapes and colors",
-    "A spider web showing radial and circular symmetry",
-    "Dominoes arranged in a pattern about to create a chain reaction",
-    
-    # 기술과 혁신
-    "Simple machines like pulleys, levers, and wheels working together",
-    "A wind turbine generating power near a field of flowers",
-    "Solar panels on a school roof with students observing nearby",
-    "A 3D printer creating an object layer by layer",
-    "Robots and humans working together in a collaborative space",
-    "Traditional tools and modern tools displayed side by side for comparison",
-    "A bicycle showing all its mechanical parts and how they connect",
-    
-    # 생태계와 관계
-    "A food chain illustrated: sun, plant, caterpillar, bird, and fox",
-    "Bees pollinating flowers with pollen visible on their legs",
-    "A tide pool ecosystem with various sea creatures coexisting",
-    "Earthworms aerating soil with cross-section view showing tunnels",
-    "A bird feeding its chicks in a nest with parent bringing insects",
-    "Different animals drinking from the same watering hole peacefully",
-    "A compost bin showing food scraps transforming into rich soil",
-    
-    # 건강과 신체
-    "Healthy foods arranged as a rainbow with different colored fruits and vegetables",
-    "Children playing different sports showing various movements and teamwork",
-    "A human heart model with blood vessels clearly visible and labeled",
-    "Teeth before and after brushing showing the importance of hygiene",
-    "Different exercises strengthening different muscle groups illustrated",
-    "A balanced meal with portions of grains, proteins, vegetables and fruits",
-    
-    # 날씨와 기후
-    "Different types of clouds in the sky at various heights",
-    "The water cycle illustrated in nature: ocean, clouds, rain, river",
-    "A thermometer showing temperature change from hot to cold",
-    "Wind making different effects: moving leaves, flying kite, bending grass",
-    "Snow crystals with unique patterns magnified showing their six-sided structure",
-    "Lightning striking during a storm with dark clouds and rain",
-    
-    # 물질과 변화
-    "Water in three states: ice, liquid water, and steam from boiling",
-    "Rust forming on metal showing chemical change over time",
-    "Bread dough rising in a bowl showing fermentation process",
-    "A burning log showing solid wood turning to ash and smoke",
-    "Salt dissolving in water becoming invisible solution",
-    "A frozen banana that has turned brown showing chemical change"
+    # 1. 자연의 신비와 생태계 (Nature's Mysteries & Ecosystems)
+    "A close-up of a spider web covered in morning dew, capturing a small insect, with the spider approaching",
+    "A cross-section of an ant colony underground showing queen, workers, and larvae in different chambers",
+    "A hermit crab using a colorful discarded plastic bottle cap as its shell on a sandy beach",
+    "Time-lapse style image showing a seedling pushing through cracked asphalt in a city street",
+    "A chameleon changing colors to match a vibrant tropical flower, halfway through the transformation",
+    "A large dead whale on the ocean floor (Whale Fall) becoming a feast for crabs, worms, and other deep-sea creatures",
+    "A Venus flytrap capturing a fly, showing the trigger hairs and the closing mechanism",
+    "Symbiosis: A small bird cleaning the teeth of a crocodile with its mouth open wide",
+
+    # 2. 인간과 환경 (Human Impact & Environment)
+    "A solitary polar bear standing on a small, melting iceberg in a vast blue ocean",
+    "A forest after a wildfire, showing green sprouts emerging from blackened soil (regeneration)",
+    "A beach cleanup scene showing piles of plastic waste sorted by color, with animals nearby",
+    "A futuristic vertical garden skyscraper in a dense smoggy city, acting as a 'green lung'",
+    "A turtle swimming in the ocean mistaking a floating plastic bag for a jellyfish",
+    "Traditional rice terraces on a steep mountain side, showing ancient farming engineering",
+    "A drone pollinating a field of sunflowers because real bees are absent",
+    "A massive dam holding back a river, showing the difference in water levels and ecosystem on both sides",
+
+    # 3. 과학적 현상과 원리 (Scientific Phenomena)
+    "A glass of water freezing in real-time, showing ice crystals forming from the edges inward",
+    "A prism splitting a beam of white light into a rainbow in a dark room with dust motes visible",
+    "Iron filings forming distinct magnetic field lines around a bar magnet on a white paper",
+    "A volcano erupting with lightning strikes visible within the ash cloud (volcanic lightning)",
+    "A magnified snowflake showing intricate, perfect hexagonal symmetry on a dark wool glove",
+    "A balloon sticking to a cat's fur due to static electricity, with fur standing up",
+    "The Milky Way galaxy visible clearly above a light-polluted city skyline (contrast)",
+    "A rusty bicycle chain next to a shiny new one, showing oxidation and wear over time",
+
+    # 4. 사회와 문화, 역사 (Society, Culture & History)
+    "A split image showing a classroom from 100 years ago vs. a modern VR-based classroom",
+    "People from diverse cultures holding hands, showing detailed traditional clothing and henna/tattoos",
+    "An abandoned amusement park reclaimed by nature, with vines growing over a rollercoaster",
+    "A busy traditional market in a developing country with spices, livestock, and modern smartphones visible",
+    "A child in a remote village reading a book by the light of a solar-powered lamp",
+    "Ancient cave paintings showing animals, next to a modern graffiti artist's work on a city wall",
+    "Robots working alongside humans on a car assembly line, showing cooperation",
+
+    # 5. 의외성과 호기심 자극 (Ambiguity & Curiosity)
+    "An old door standing alone in the middle of a meadow, not attached to any building",
+    "A library where books are flying off the shelves like birds (magical realism/metaphor)",
+    "A giant footprint in the mud that doesn't match any known animal, with researchers measuring it",
+    "A clock melting over a tree branch (inspired by Dali) but in a realistic photo style",
+    "A ladder reaching up into the clouds with no visible top",
+    "A fishbowl with the ocean inside it, sitting on a dry desert dune",
+    "Shadows of people on a wall that are doing something different than the people casting them"
 ]
 
 @app.get("/")
@@ -173,3 +131,89 @@ async def generate_feedback(request: FeedbackRequest):
         stage=request.stage
     )
     return {"feedbacks": feedbacks}
+
+# Data Flywheel Storage Implementation
+class TeacherEval(BaseModel):
+    score: int
+    comment: str = ""
+
+class ModelFeedback(BaseModel):
+    model_id: str
+    feedback_text: str
+
+# 각 단계(See, Think, Wonder)별 평가 데이터 구조
+class TeacherEval(BaseModel):
+    score: int
+    comment: str = ""
+    feedback_text: str = "" # Added feedback text field
+
+class SubmitRequest(BaseModel):
+    session_id: str
+    image_url: str
+    student_response: Dict[str, str] # {see, think, wonder}
+    scenario: str
+    evaluations: Dict[str, Dict[str, Dict[str, Any]]] 
+    # Structure: { 
+    #   "See": { "gpt-4o": {score: 9, comment: "..", feedback_text: ".."}, ... },
+    # }
+
+@app.post("/submit-evaluation")
+async def submit_evaluation(request: SubmitRequest):
+    print(f"[DATA] Submitting session {request.session_id}")
+    
+    final_image_url = request.image_url
+
+    # 0. Image Upload to Supabase Storage (Optional)
+    # User requested to skip storage upload and use local URL/Path as data reference.
+    # This is valid for Data Flywheel as 'scenario' text serves as the grounding context.
+    
+    # if request.image_url.startswith("/generated/"):
+    #     try:
+    #         filename = request.image_url.split("/")[-1]
+    #         # ... upload logic ...
+    #         # (Disabled for Local-Only Mode)
+    #     except ...
+    
+    # Just use the incoming URL (local path)
+    final_image_url = request.image_url
+
+    try:
+        # 1. Save Session Data
+        session_data = {
+            "session_id": request.session_id,
+            "scenario_text": request.scenario,
+            "image_url": final_image_url, # Use the uploaded URL or original
+            "student_response_see": request.student_response.get('see', ''),
+            "student_response_think": request.student_response.get('think', ''),
+            "student_response_wonder": request.student_response.get('wonder', '')
+        }
+        
+        # Save to Supabase 'flywheel_sessions'
+        supabase.table("flywheel_sessions").insert(session_data).execute()
+
+        # 2. Save Evaluations
+        eval_records = []
+        
+        for stage, models_evals in request.evaluations.items():
+            if not models_evals: continue
+            
+            for model_id, eval_data in models_evals.items():
+                record = {
+                    "session_id": request.session_id,
+                    "routine_step": stage.lower(),
+                    "model_id": model_id,
+                    "feedback_content": eval_data.get('feedback_text', 'No content provided'), 
+                    "teacher_score": int(eval_data.get('score', 0)),
+                    "teacher_comment": eval_data.get('comment', '')
+                }
+                eval_records.append(record)
+        
+        if eval_records:
+            supabase.table("flywheel_evaluations").insert(eval_records).execute()
+            print(f"[SUCCESS] Saved {len(eval_records)} evaluation records")
+                
+        return {"status": "success", "records_saved": len(eval_records), "image_url": final_image_url}
+
+    except Exception as e:
+        print(f"[ERROR] Submit failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

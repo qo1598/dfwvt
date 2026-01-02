@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const EvaluationStep = ({ stage, studentText, fullStudentResponse, onNext, onBack, isLastStep, accessCode, cachedFeedback, onFeedbackGenerated }) => {
+const EvaluationStep = ({ stage, studentText, fullStudentResponse, onNext, onBack, isLastStep, cachedFeedback, onFeedbackGenerated }) => {
     const [loading, setLoading] = useState(!cachedFeedback);
     const [feedbacks, setFeedbacks] = useState(cachedFeedback || []);
     const [evaluations, setEvaluations] = useState({});
@@ -21,8 +21,6 @@ const EvaluationStep = ({ stage, studentText, fullStudentResponse, onNext, onBac
                 const response = await axios.post(`${API_URL}/generate-feedback`, {
                     student_response: fullStudentResponse,
                     stage: stage.toLowerCase()
-                }, {
-                    headers: { 'x-access-code': accessCode }
                 });
 
                 const newFeedbacks = response.data.feedbacks;
@@ -167,8 +165,7 @@ const EvaluationStep = ({ stage, studentText, fullStudentResponse, onNext, onBac
                 <button
                     onClick={() => onNext(stage, evaluations)}
                     disabled={!isFormValid() || loading}
-                    className={`font-bold py-3 px-8 rounded-lg shadow transition-colors ${
-                        loading 
+                    className={`font-bold py-3 px-8 rounded-lg shadow transition-colors ${loading
                             ? 'bg-gray-400 cursor-not-allowed text-white'
                             : isLastStep
                                 ? 'bg-green-600 hover:bg-green-700 text-white'

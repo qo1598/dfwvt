@@ -2,10 +2,8 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import Step1_Context from './components/Step1_Context'
 import EvaluationStep from './components/EvaluationStep'
-import AccessCodeModal from './components/AccessCodeModal'
 
 function App() {
-  const [accessCode, setAccessCode] = useState(localStorage.getItem("access_code"));
   const [step, setStep] = useState(0); // 0: Init, 1: Context, 2: See, 3: Think, 4: Wonder, 5: Done
   const [sessionData, setSessionData] = useState(null);
   const [allEvaluations, setAllEvaluations] = useState({});
@@ -13,66 +11,42 @@ function App() {
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  // Init Data on Mount (Auto Auth for Blind Pilot)
+  // Init Data on Mount
   useEffect(() => {
-    // If no code, set default to avoid modal
-    if (!accessCode) {
-      verifyCode("PILOT2025");
+    // Check local storage for session
+    const savedSession = localStorage.getItem("saved_session");
+    if (savedSession) {
+      console.log("Restoring session from storage...");
+      const parsed = JSON.parse(savedSession);
+
+      // Check for error states in cached session
+      if (parsed.image_url && (parsed.image_url.includes("Error") || parsed.image_url.includes("placehold.co"))) {
+        console.log("Found broken session, discarding and refreshing...");
+        localStorage.removeItem("saved_session");
+        refreshSession();
+      } else {
+        setSessionData(parsed);
+        setStep(1);
+      }
+    } else {
+      console.log("No saved session, fetching new...");
+      refreshSession();
     }
   }, []);
 
-  const verifyCode = (code) => {
-    localStorage.setItem("access_code", code);
-    setAccessCode(code);
-    // useEffect below triggers
-  };
-
-  useEffect(() => {
-    if (accessCode) {
-      const savedSession = localStorage.getItem("saved_session");
-      if (savedSession) {
-        console.log("Restoring session from storage...");
-        const parsed = JSON.parse(savedSession);
-
-        // Check for error states in cached session
-        if (parsed.image_url && (parsed.image_url.includes("Error") || parsed.image_url.includes("placehold.co"))) {
-          console.log("Found broken session, discarding and refreshing...");
-          localStorage.removeItem("saved_session");
-          refreshSession(accessCode);
-        } else {
-          setSessionData(parsed);
-          setStep(1);
-        }
-      } else {
-        console.log("No saved session, fetching new...");
-        refreshSession(accessCode);
-      }
-    }
-  }, [accessCode]);
-
-  const refreshSession = async (code = accessCode) => {
+  const refreshSession = async () => {
     try {
       setStep(0);
       setFeedbackCache({}); // Reset cache on new session
-      const res = await axios.get(`${API_URL}/generate-session`, {
-        headers: { 'x-access-code': code }
-      });
+      const res = await axios.get(`${API_URL}/generate-session`);
       // Structure: { image_url, student_response: { see, think, wonder } }
-      // The backend returns a relative image path (e.g. /generated/...) OR a base64
-      // If it's relative path, we need to prepend API URL if serving statically from backend, 
-      // OR if frontend/public/generated is shared. 
-      // For Vite during dev, if we save to frontend/public, it just works with /generated path.
 
       setSessionData(res.data);
       localStorage.setItem("saved_session", JSON.stringify(res.data));
       setStep(1); // Go to Context Step
     } catch (e) {
       console.error("Failed to init session", e);
-      if (e.response && e.response.status === 401) {
-        alert("Invalid Access Code! Please check your code.");
-        setAccessCode(null);
-        localStorage.removeItem("access_code");
-      }
+      alert("세션을 불러오는데 실패했습니다. 백엔드 서버가 실행 중인지 확인해주세요.");
     }
   };
 
@@ -84,6 +58,7 @@ function App() {
   };
 
   const handleEvaluationSubmit = (stage, evaluations) => {
+    // stage comes in as "See", "Think", "Wonder" from props
     setAllEvaluations(prev => ({ ...prev, [stage]: evaluations }));
 
     if (step < 4) {
@@ -99,19 +74,50 @@ function App() {
   };
 
   const submitFinalData = async (lastEvaluations) => {
+    // 1. Merge last step evaluations into allEvaluations
+    const completeEvaluations = {
+      ...allEvaluations,
+      Wonder: lastEvaluations // Ensure key matches 'Wonder' stage
+    };
+
+    // 2. Enhance evaluations with feedback text from cache
+    // We need to transform the structure for the backend
+    const enrichedEvaluations = {};
+
+    // Stages: 'See', 'Think', 'Wonder'
+    ['See', 'Think', 'Wonder'].forEach(stage => {
+      const stageEvals = completeEvaluations[stage] || {};
+      const stageFeedbacks = feedbackCache[stage] || [];
+
+      enrichedEvaluations[stage] = {};
+
+      stageFeedbacks.forEach(fb => {
+        const modelId = fb.model_id;
+        const userEval = stageEvals[modelId] || { score: 0, comment: "" };
+
+        enrichedEvaluations[stage][modelId] = {
+          score: Number(userEval.score),
+          comment: userEval.comment || "",
+          feedback_text: fb.feedback_text // INCLUDE THE FEEDBACK TEXT!
+        };
+      });
+    });
+
     const finalPayload = {
       session_id: crypto.randomUUID(),
       ...sessionData,
-      evaluations: {
-        ...allEvaluations,
-        wonder: lastEvaluations // Add the last one
-      }
+      evaluations: enrichedEvaluations
     };
 
     console.log("Submitting Final Data:", finalPayload);
-    // await axios.post(`${API_URL}/submit-evaluation`, finalPayload);
-
-    setStep(5); // Completion Screen
+    try {
+      await axios.post(`${API_URL}/submit-evaluation`, finalPayload);
+      setStep(5); // Completion Screen only on success
+    } catch (error) {
+      console.error("Submission failed:", error);
+      alert("데이터 저장 중 오류가 발생했습니다. 개발자 도구 콘솔을 확인해주세요.");
+      setStep(5);
+    }
   };
 
   if (step === 0) {
@@ -176,7 +182,6 @@ function App() {
             fullStudentResponse={sessionData.student_response}
             onNext={handleEvaluationSubmit}
             onBack={() => setStep(1)}
-            accessCode={accessCode}
             cachedFeedback={feedbackCache['See']}
             onFeedbackGenerated={handleFeedbackGenerated}
           />
@@ -188,7 +193,6 @@ function App() {
             fullStudentResponse={sessionData.student_response}
             onNext={handleEvaluationSubmit}
             onBack={() => setStep(2)}
-            accessCode={accessCode}
             cachedFeedback={feedbackCache['Think']}
             onFeedbackGenerated={handleFeedbackGenerated}
           />
@@ -201,7 +205,6 @@ function App() {
             onNext={handleEvaluationSubmit}
             onBack={() => setStep(3)}
             isLastStep={true}
-            accessCode={accessCode}
             cachedFeedback={feedbackCache['Wonder']}
             onFeedbackGenerated={handleFeedbackGenerated}
           />
