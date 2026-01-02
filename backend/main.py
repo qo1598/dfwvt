@@ -176,8 +176,13 @@ async def submit_evaluation(request: SubmitRequest):
     #         # (Disabled for Local-Only Mode)
     #     except ...
     
-    # Just use the incoming URL (local path)
+    # Just use the incoming URL (local path) or Base64
     final_image_url = request.image_url
+    
+    # [FIX] Prevent saving massive Base64 strings to DB (causes 500 Error)
+    if final_image_url and final_image_url.startswith("data:image"):
+        print("[INFO] Base64 image detected. Replacing with placeholder for DB storage.")
+        final_image_url = "(Base64 Image Data - Not Stored in DB to prevent payload overflow)"
 
     try:
         # 1. Save Session Data
