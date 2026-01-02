@@ -122,7 +122,7 @@ function App() {
 
   if (step === 0) {
     return (
-      <div className="h-screen flex items-center justify-center bg-gray-50">
+      <div className="h-screen w-full flex items-center justify-center bg-gray-50">
         <div className="text-center max-w-md px-6">
           <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-6"></div>
           <h1 className="text-2xl font-semibold text-gray-700 mb-3">사고 루틴에 따른 학생 응답을 불러오고 있습니다.</h1>
@@ -134,7 +134,7 @@ function App() {
 
   if (step === 5) {
     return (
-      <div className="h-screen flex items-center justify-center bg-green-50">
+      <div className="h-screen w-full flex items-center justify-center bg-green-50">
         <div className="text-center p-12 bg-white rounded-xl shadow-2xl max-w-lg mx-6">
           <div className="mb-6">
             <svg className="w-20 h-20 text-green-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
